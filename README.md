@@ -1,4 +1,4 @@
-<img src=“images/cover.jpg” />
+![alt text](https://github.com/Allelallecialle/HemoSense/blob/main/images/cover.jpg?raw=true)
 # HemoSense
 Hemosense is a **multimodal**, **autonomous** and **adaptive** system to prevent and mitigate adverse events (e.g. vasovagal syncopes) during plasmapheresis and
 whole blood donations. The goals are to:
