@@ -14,7 +14,7 @@ def get_hand_state():
     return "squeeze" or "release"
     """
     # Temporary keyboard mapping for testing:
-    # SPACE = squeeze
+    #SPACE = squeeze
     keys = pygame.key.get_pressed()
     if keys[pygame.K_SPACE]:
         return "squeeze"

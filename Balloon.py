@@ -16,24 +16,20 @@ class Balloon:
             self.velocity += DESCENT_SPEED
 
         # gravity stabilizes motion
-        self.velocity += GRAVITY * 0.2
+        self.velocity += GRAVITY * 0.1
 
         self.y += self.velocity
 
         # clamp to window
-        if self.y < BALLOON_RADIUS:
-            self.y = BALLOON_RADIUS
+        if self.y < BALLOON_HEIGHT:
+            self.y = BALLOON_HEIGHT
             self.velocity = 0
-        if self.y > HEIGHT - BALLOON_RADIUS:
-            self.y = HEIGHT - BALLOON_RADIUS
+        if self.y > HEIGHT - BALLOON_HEIGHT:
+            self.y = HEIGHT - BALLOON_HEIGHT
             self.velocity = 0
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (255, 100, 100), (self.x, int(self.y)), BALLOON_RADIUS)
-        pygame.draw.line(screen, (100, 80, 80),
-                         (self.x, int(self.y + BALLOON_RADIUS)),
-                         (self.x - 10, int(self.y + BALLOON_RADIUS + 40)), 4)
-        pygame.draw.line(screen, (100, 80, 80),
-                         (self.x, int(self.y + BALLOON_RADIUS)),
-                         (self.x + 10, int(self.y + BALLOON_RADIUS + 40)), 4)
+        balloon_img = pygame.image.load("./images/air_balloon.svg")
+        balloon_img_scaled = pygame.transform.scale(balloon_img, (BALLOON_WIDTH, BALLOON_HEIGHT))
+        screen.blit(balloon_img_scaled, (self.x, int(self.y)))
 

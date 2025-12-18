@@ -1,14 +1,17 @@
-WIDTH = 2800
-HEIGHT = 1500
+#use background image dimensions in pixels
+WIDTH = 1724
+HEIGHT = 974
 FPS = 30
 
-BALLOON_RADIUS = 30
+BALLOON_WIDTH = 80
+BALLOON_HEIGHT = 120
+
 BALLOON_START_Y = HEIGHT // 2
 BALLOON_X = WIDTH // 2
 
-ASCENT_SPEED = 2       # per frame when squeezing
-DESCENT_SPEED = 2      # per frame when releasing
-GRAVITY = 0.2          # passive descent
+ASCENT_SPEED = 0.5       # n frame when squeezing
+DESCENT_SPEED = 0.5      # n frame when releasing
+GRAVITY = 0.2     # passive descent
 
-TARGET_BAND_HEIGHT = 120
-TARGET_OSCILLATION_SPEED = 0.8   # speed of movement
+TARGET_BAND_HEIGHT = 170
+TARGET_OSCILLATION_SPEED = 0.5   # speed of movement
