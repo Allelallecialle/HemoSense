@@ -7,7 +7,7 @@ BALLOON_WIDTH = 80
 BALLOON_HEIGHT = 120
 
 BALLOON_START_Y = HEIGHT // 2
-BALLOON_X = WIDTH // 2
+BALLOON_X = WIDTH // 5
 
 ASCENT_SPEED = 0.5       # n frame when squeezing
 DESCENT_SPEED = 0.5      # n frame when releasing
