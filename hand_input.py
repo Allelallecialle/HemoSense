@@ -5,6 +5,7 @@ import game_config
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+from mediapipe_utils import *
 
 BaseOptions = mp.tasks.BaseOptions
 HandLandmarker = mp.tasks.vision.HandLandmarker
@@ -12,54 +13,86 @@ HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
 HandLandmarkerResult = mp.tasks.vision.HandLandmarkerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
-CURRENT_HAND_STATE = "release"  # default state
+# initialize the global var to make it importable to main
+CURRENT_HAND_STATE = "release"
+LAST_HAND_RESULT = None
 
-# Create a hand landmarker instance with the live stream mode:
-def print_result(result: HandLandmarkerResult, output_image: mp.Image, timestamp_ms: int):
-    print('hand landmarker result: {}'.format(result))
+def capture_from_camera():
+    options = HandLandmarkerOptions(
+        base_options=BaseOptions(model_asset_path='./mediapipe_models/hand_landmarker.task'),
+        running_mode=VisionRunningMode.LIVE_STREAM,
+        num_hands=1,
+        result_callback=set_hand_state)
 
-
-options = HandLandmarkerOptions(
-    base_options=BaseOptions(model_asset_path='/path/to/model.task'),
-    running_mode=VisionRunningMode.LIVE_STREAM,
-    num_hands=1,
-    result_callback=print_result)
-with HandLandmarker.create_from_options(options) as landmarker:
-    pass
-
-def capture_from_webcam():
+    #cam = cv2.VideoCapture(1)  # to capture from external camera
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
     cam = cv2.VideoCapture(0)
     frame_number = 0
 
-    # Create a loop to read the latest frame from the camera using VideoCapture#read()
-    while cam.isOpened():
-        ret, frame = cam.read()
+    with HandLandmarker.create_from_options(options) as landmarker:
+        # loop to read the latest frame from the camera
+        while cam.isOpened():
+            ret, frame = cam.read()
 
-        if np.shape(frame) == ():
-            cam.release()
-            cv2.destroyAllWindows()
+            if np.shape(frame) == ():
+                break
 
-        frame_number = frame_number + 1
-        # Convert the frame received from OpenCV to a MediaPipe’s Image object.
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+            frame_number += 1
+            # convert the opencv frame to a mediapipe Image object
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB,
+                                data=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            landmarker.detect_async(mp_image, frame_number)
 
-    cam.release()
-    cv2.destroyAllWindows()
+            # DEBUG
+            cv2.putText(frame, CURRENT_HAND_STATE,
+                        (50, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (0, 255, 0), 2)
+            annotated_image = frame.copy()
+            if LAST_HAND_RESULT is not None:
+                annotated_image = draw_landmarks_on_image(
+                    cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB),
+                    LAST_HAND_RESULT
+                )
+            cv2.imshow("Hand Detection", cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB))
 
-def mediapipe_get_hand_state():
+
+            # exit while
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cam.release()
+        cv2.destroyAllWindows()
+        landmarker.close()
+
+def mediapipe_get_hand_state(landmarks):
     """
     MediaPipe detection of the hand state.
     Returns "squeeze" or "release"
+    If the fingertips are close to the palm -> 'squeeze'
+    else -> 'release'
     """
-    # Send live image data to perform hand landmarks detection.
-    # The results are accessible via the `result_callback` provided in
-    # the `HandLandmarkerOptions` object.
-    # The hand landmarker must be created with the live stream mode.
-    #landmarker.detect_async(mp_image, frame_timestamp_ms)
-    # if :
-    #     return "squeeze"
-    # return "release"
+    # landmarks numbers we need
+    TIP_IDS = [4, 8, 12, 16, 20]  # tips of fingers
+    WRIST_ID = 0  # to compute distance from the fingers
+
+    distances = []
+
+    wrist = landmarks[WRIST_ID]
+    for tip_id in TIP_IDS:
+        tip = landmarks[tip_id]
+        dist = np.linalg.norm(
+            np.array([tip.x - wrist.x, tip.y - wrist.y])
+        )   #compute the norm = the magnitude of distance vector
+        distances.append(dist)
+
+    avg_dist = np.mean(distances)   # some fingers may close earlier/later so average the distances
+
+    # threshold chosen empirically
+    if avg_dist < 0.35:
+        return "squeeze"
+    else:
+        return "release"
 
 def get_hand_state():
     """
@@ -72,3 +105,20 @@ def get_hand_state():
     if keys[pygame.K_SPACE]:
         return "squeeze"
     return "release"
+
+def set_hand_state(landmarks, output_image, timestamp):
+    global CURRENT_HAND_STATE   # set to global var to see it from main. More convenient than returning a value
+    global LAST_HAND_RESULT
+
+    LAST_HAND_RESULT = landmarks  #store landmarks before they change for visualization
+
+    # Safety check: no hands detected
+    if not landmarks.hand_landmarks:
+        CURRENT_HAND_STATE = "release"
+        return
+
+    try:
+        res = landmarks.hand_landmarks[0]
+        CURRENT_HAND_STATE = mediapipe_get_hand_state(res)
+    except IndexError:
+        CURRENT_HAND_STATE = "release"  # default state

@@ -3,6 +3,8 @@ import sys
 import math
 from game_config import *
 import Balloon, TargetBand, hand_input
+from hand_input import CURRENT_HAND_STATE, capture_from_camera
+import threading
 
 #Credits for sliding to russ123's github repo: https://github.com/russs123/pygame_tutorials/blob/main/Infinite_Background/scroll_tut.py
 
@@ -11,6 +13,16 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Balloon Glide")
 clock = pygame.time.Clock()
+
+
+# --- START HAND TRACKING THREAD ---
+hand_thread = threading.Thread(
+    target=hand_input.capture_from_camera,
+    daemon=True
+)
+hand_thread.start()
+#-----------------------------
+
 
 balloon = Balloon.Balloon()
 target = TargetBand.TargetBand()
@@ -26,6 +38,7 @@ bg_rect = bg.get_rect()
 scroll = 0
 tiles = math.ceil(WIDTH / bg_width) + 1
 running = True
+
 while running:
     clock.tick(FPS)
 
@@ -41,8 +54,8 @@ while running:
     if abs(scroll) > bg_width:
         scroll = 0
 
-    # --- Update ---
-    hand_state = hand_input.get_hand_state()  # integrate mediapipe here!
+    # update points
+    hand_state = CURRENT_HAND_STATE  # mediapipe input
     balloon.update(hand_state)
     target.update()
 
@@ -65,7 +78,7 @@ while running:
     # event handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False
+            running = False
 
 pygame.quit()
 sys.exit()
