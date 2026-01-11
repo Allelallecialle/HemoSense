@@ -9,9 +9,9 @@ BALLOON_HEIGHT = 120
 BALLOON_START_Y = HEIGHT // 2
 BALLOON_X = WIDTH // 5
 
-ASCENT_SPEED = 0.5       # n frame when squeezing
-DESCENT_SPEED = 0.5      # n frame when releasing
-GRAVITY = 0.2     # passive descent
+ASCENT_SPEED = 1.2
+GRAVITY = 0.4
+DAMPING = 0.7
 
 TARGET_BAND_HEIGHT = 170
 TARGET_OSCILLATION_SPEED = 0.5   # speed of movement

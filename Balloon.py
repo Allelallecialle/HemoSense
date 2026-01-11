@@ -8,19 +8,17 @@ class Balloon:
         self.velocity = 0
 
     def update(self, state):
-        # state: "squeeze" or "release"
-
         if state == "squeeze":
             self.velocity -= ASCENT_SPEED
-        else:
-            self.velocity += DESCENT_SPEED
 
-        # gravity stabilizes motion
-        self.velocity += GRAVITY * 0.1
+        # gravity that always pulls down
+        self.velocity += GRAVITY
+        #simulate air resistance
+        self.velocity = self.velocity * DAMPING
 
+        #update position
         self.y += self.velocity
 
-        # clamp to window
         if self.y < BALLOON_HEIGHT:
             self.y = BALLOON_HEIGHT
             self.velocity = 0

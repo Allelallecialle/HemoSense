@@ -3,7 +3,6 @@ import sys
 import math
 from game_config import *
 import Balloon, TargetBand, hand_input
-from hand_input import CURRENT_HAND_STATE, capture_from_camera
 import threading
 
 #Credits for sliding to russ123's github repo: https://github.com/russs123/pygame_tutorials/blob/main/Infinite_Background/scroll_tut.py
@@ -24,6 +23,7 @@ hand_thread.start()
 #-----------------------------
 
 
+#--- PYGAME VIDEOGAME SECTION ---
 balloon = Balloon.Balloon()
 target = TargetBand.TargetBand()
 
@@ -54,9 +54,7 @@ while running:
     if abs(scroll) > bg_width:
         scroll = 0
 
-    # update points
-    hand_state = CURRENT_HAND_STATE  # mediapipe input
-    balloon.update(hand_state)
+    balloon.update(hand_input.CURRENT_HAND_STATE)  # mediapipe input
     target.update()
 
     # scoring

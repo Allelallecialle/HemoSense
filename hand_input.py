@@ -24,9 +24,9 @@ def capture_from_camera():
         num_hands=1,
         result_callback=set_hand_state)
 
-    #cam = cv2.VideoCapture(1)  # to capture from external camera
+    cam = cv2.VideoCapture(2)  # to capture from external camera
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
-    cam = cv2.VideoCapture(0)
+    #cam = cv2.VideoCapture(0)
     frame_number = 0
 
     with HandLandmarker.create_from_options(options) as landmarker:
@@ -110,7 +110,7 @@ def set_hand_state(landmarks, output_image, timestamp):
     global CURRENT_HAND_STATE   # set to global var to see it from main. More convenient than returning a value
     global LAST_HAND_RESULT
 
-    LAST_HAND_RESULT = landmarks  #store landmarks before they change for visualization
+    LAST_HAND_RESULT = landmarks  #store landmarks for visualization
 
     # Safety check: no hands detected
     if not landmarks.hand_landmarks:
