@@ -9,9 +9,12 @@ BALLOON_HEIGHT = 120
 BALLOON_START_Y = HEIGHT // 2
 BALLOON_X = WIDTH // 5
 
-ASCENT_SPEED = 1.2
-GRAVITY = 0.4
-DAMPING = 0.7
+ASCENT_SPEED = 1.7
+GRAVITY = 0.8
+DAMPING = 0.75
 
 TARGET_BAND_HEIGHT = 170
 TARGET_OSCILLATION_SPEED = 0.5   # speed of movement
+
+TARGET_PERIOD = 7.5          # AMT needs approximately 5s of muscle tension. Set to 7s for reaction time and more relaxed animation
+TARGET_AMPLITUDE = 110

@@ -24,9 +24,9 @@ def capture_from_camera():
         num_hands=1,
         result_callback=set_hand_state)
 
-    cam = cv2.VideoCapture(2)  # to capture from external camera
+    #cam = cv2.VideoCapture(2)  # to capture from external camera
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
-    #cam = cv2.VideoCapture(0)
+    cam = cv2.VideoCapture(0)
     frame_number = 0
 
     with HandLandmarker.create_from_options(options) as landmarker:

@@ -28,6 +28,7 @@ balloon = Balloon.Balloon()
 target = TargetBand.TargetBand()
 
 score = 0
+start_time = 0
 
 font = pygame.font.SysFont("Verdana", 32)
 
@@ -41,6 +42,7 @@ running = True
 
 while running:
     clock.tick(FPS)
+    dt = clock.tick(FPS) / 1000.0
 
     # draw scrolling background
     for i in range(0, tiles):
@@ -55,14 +57,28 @@ while running:
         scroll = 0
 
     balloon.update(hand_input.CURRENT_HAND_STATE)  # mediapipe input
-    target.update()
+    target.update(dt)
 
-    # scoring
+    # scoring: to increment the score keep the air balloon in the target zone for at least 5s
     band_top = target.center_y - TARGET_BAND_HEIGHT // 2
     band_bottom = target.center_y + TARGET_BAND_HEIGHT // 2
-    if band_top < balloon.y < band_bottom:
-        score += 1/(FPS*0.5)  # to increment keep the air balloon inside for long enough
-
+    # counter_score to count the seconds inside the target band
+    if band_top <= balloon.y + BALLOON_HEIGHT and  balloon.y - BALLOON_HEIGHT <= band_bottom:
+        if start_time == 0:
+            start_time = pygame.time.get_ticks()
+        else:
+            current_time = pygame.time.get_ticks()
+            time_passed = (current_time - start_time) / 1000
+            print(time_passed)
+            if time_passed >= 5:
+                score += 1
+                start_time = 0
+                current_time = 0
+                time_passed = 0
+    else:
+        start_time = 0
+        current_time = 0
+        time_passed = 0
 
     target.draw(screen)
     balloon.draw(screen)

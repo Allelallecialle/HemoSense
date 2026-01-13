@@ -5,16 +5,24 @@ import math
 class TargetBand:
     def __init__(self):
         self.center_y = HEIGHT // 2
-        self.offset = 0
+        self.time = 0.0
+        self.angular_speed = 2 * math.pi / TARGET_PERIOD
 
-    def update(self):
-        self.offset += TARGET_OSCILLATION_SPEED
-        self.center_y = HEIGHT // 2 + math.sin(self.offset / 40) * 150
+    def update(self, dt):
+        self.time += dt
+        self.center_y = (HEIGHT // 2 + math.sin(self.angular_speed * self.time) * TARGET_AMPLITUDE)
 
     def draw(self, screen):
-        top = self.center_y - TARGET_BAND_HEIGHT // 2
-        pygame.draw.rect(screen, (180, 220, 255),
-                         (0, top, WIDTH, TARGET_BAND_HEIGHT),
-                         border_radius=10)
-        pygame.draw.rect(screen, (100, 150, 200),
-                         (0, top, WIDTH, TARGET_BAND_HEIGHT), 4)
+        top = int(self.center_y - TARGET_BAND_HEIGHT // 2)
+        pygame.draw.rect(
+            screen,
+            (180, 220, 255),
+            (0, top, WIDTH, TARGET_BAND_HEIGHT),
+            border_radius=10
+        )
+        pygame.draw.rect(
+            screen,
+            (100, 150, 200),
+            (0, top, WIDTH, TARGET_BAND_HEIGHT),
+            4
+        )
