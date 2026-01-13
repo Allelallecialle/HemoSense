@@ -2,7 +2,7 @@ import pygame
 import sys
 import math
 from game_config import *
-import Balloon, TargetBand, hand_input
+import Balloon, TargetBand, hand_input, introduction_screen, fainting_simulation
 import threading
 
 #Credits for sliding to russ123's github repo: https://github.com/russs123/pygame_tutorials/blob/main/Infinite_Background/scroll_tut.py
@@ -26,6 +26,7 @@ hand_thread.start()
 #--- PYGAME VIDEOGAME SECTION ---
 balloon = Balloon.Balloon()
 target = TargetBand.TargetBand()
+game_start_time = pygame.time.get_ticks()
 
 score = 0
 start_time = 0
@@ -38,8 +39,13 @@ bg_rect = bg.get_rect()
 # define game variables
 scroll = 0
 tiles = math.ceil(WIDTH / bg_width) + 1
-running = True
 
+trigger_fainting = False
+
+#start introduction
+introduction_screen.show_instruction_screen(screen, clock)
+
+running = True
 while running:
     clock.tick(FPS)
     dt = clock.tick(FPS) / 1000.0
@@ -93,6 +99,16 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # to trigger a fainting simulation. In real case scenario we would have the alarm to physicians
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                trigger_fainting = True
+                running = False
+                fainting_simulation.simulation_fainting(trigger_fainting, screen, clock)
+
+    # Automatically stop the game after 10 AMT repetitions (i.e. 10s*10=100s)
+    if pygame.time.get_ticks() - game_start_time > GAME_DURATION:
+        running = False
 
 pygame.quit()
 sys.exit()

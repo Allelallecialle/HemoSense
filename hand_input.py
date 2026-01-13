@@ -94,18 +94,6 @@ def mediapipe_get_hand_state(landmarks):
     else:
         return "release"
 
-def get_hand_state():
-    """
-    Test function for the videogame development with keyboard input.
-    Returns "squeeze" or "release"
-    """
-    # Temporary keyboard mapping for testing:
-    #SPACE = squeeze
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]:
-        return "squeeze"
-    return "release"
-
 def set_hand_state(landmarks, output_image, timestamp):
     global CURRENT_HAND_STATE   # set to global var to see it from main. More convenient than returning a value
     global LAST_HAND_RESULT
