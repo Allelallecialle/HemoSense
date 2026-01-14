@@ -4,6 +4,7 @@ import math
 from game_config import *
 import Balloon, TargetBand, hand_input, introduction_screen, fainting_simulation
 import threading
+from arduino_sketch.serial_port_setup import arduino_disconnect, arduino_connection
 
 #Credits for sliding to russ123's github repo: https://github.com/russs123/pygame_tutorials/blob/main/Infinite_Background/scroll_tut.py
 
@@ -20,8 +21,8 @@ hand_thread = threading.Thread(
     daemon=True
 )
 hand_thread.start()
-#-----------------------------
-
+#--------- CALL ARDUINO SETUP -------------
+arduino = arduino_connection()
 
 #--- PYGAME VIDEOGAME SECTION ---
 balloon = Balloon.Balloon()
@@ -69,6 +70,7 @@ while running:
     band_top = target.center_y - TARGET_BAND_HEIGHT // 2
     band_bottom = target.center_y + TARGET_BAND_HEIGHT // 2
     # counter_score to count the seconds inside the target band
+    #TODO check if it's ok
     if band_top <= balloon.y + BALLOON_HEIGHT and  balloon.y - BALLOON_HEIGHT <= band_bottom:
         if start_time == 0:
             start_time = pygame.time.get_ticks()
@@ -103,8 +105,10 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 trigger_fainting = True
+                fainting_simulation.simulation_fainting(trigger_fainting, screen, clock, arduino)
+                arduino = arduino_disconnect(arduino)
                 running = False
-                fainting_simulation.simulation_fainting(trigger_fainting, screen, clock)
+            #TODO: fix close fainting
 
     # Automatically stop the game after 10 AMT repetitions (i.e. 10s*10=100s)
     if pygame.time.get_ticks() - game_start_time > GAME_DURATION:
