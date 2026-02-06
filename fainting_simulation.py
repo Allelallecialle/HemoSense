@@ -1,9 +1,5 @@
-import sys
-
 from game_config import *
 import pygame
-import time
-import serial
 import numpy as np
 
 def simulation_fainting(trigger_fainting, screen, clock, arduino):

@@ -1,10 +1,4 @@
-import cv2
-import pygame
-import numpy as np
-import game_config
 import mediapipe as mp
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 from mediapipe_utils import *
 
 BaseOptions = mp.tasks.BaseOptions
@@ -24,9 +18,9 @@ def capture_from_camera():
         num_hands=1,
         result_callback=set_hand_state)
 
-    #cam = cv2.VideoCapture(2)  # to capture from external camera
+    cam = cv2.VideoCapture(2)  # to capture from external camera
     # Use OpenCV’s VideoCapture to start capturing from the webcam.
-    cam = cv2.VideoCapture(0)
+    #cam = cv2.VideoCapture(0)
     frame_number = 0
 
     with HandLandmarker.create_from_options(options) as landmarker:
@@ -89,7 +83,7 @@ def mediapipe_get_hand_state(landmarks):
     avg_dist = np.mean(distances)   # some fingers may close earlier/later so average the distances
 
     # threshold chosen empirically
-    if avg_dist < 0.35:
+    if avg_dist < 0.2:
         return "squeeze"
     else:
         return "release"

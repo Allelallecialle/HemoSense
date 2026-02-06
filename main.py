@@ -29,6 +29,12 @@ balloon = Balloon.Balloon()
 target = TargetBand.TargetBand()
 game_start_time = pygame.time.get_ticks()
 
+# init for pygame music
+file = './pygame_music/08-Spring-Sunrise.mp3'
+pygame.mixer.init()
+pygame.mixer.music.load(file)
+pygame.mixer.music.play()   #start playing music
+
 score = 0
 start_time = 0
 
@@ -105,6 +111,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 trigger_fainting = True
+                pygame.mixer.music.stop()
                 fainting_simulation.simulation_fainting(trigger_fainting, screen, clock, arduino)
                 arduino = arduino_disconnect(arduino)
                 running = False
