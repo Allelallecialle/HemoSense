@@ -1,5 +1,4 @@
 import threading
-
 import numpy as np
 
 
@@ -23,6 +22,13 @@ class FaintingRisk:
             return self.fidget, self.stress, self.risk, self.start_game
 
     def risk_computation(self):
+        # compute fainting risk combining fidgeting and stress scores. A sigmoid was chosen: value in [0,1],
+        # used in DL/ML, smoother function to avoid sudden transitions (=triggers).
+        # NOTE: this is a DEMO. In the complete system, there would be a more complex, ML driven computation
+        # combining also pallor analysis, weather data, donor's profile and data from the medical assessment
+        # Hypothesis for complete implementation: The center of the sigmoid could be fixed at the "donor's base risk",
+        # computed by the data previously mentioned, while the real-time risk is computed using the current implementation
+        # with also pallor analysis.
         risk = 1 / (1 + np.exp(-(1 * self.fidget + 1 * self.stress)))
         return risk
 

@@ -49,13 +49,7 @@ def distress_worker(shared):
 
             # ---------------- Fidgeting detection from pose ----------------
             if pose_res.pose_landmarks:
-                # draw pose landmarks (slow if uncommented)
-                # mp_draw.draw_landmarks(
-                #     frame,
-                #     pose_res.pose_landmarks,
-                #     mp_pose.POSE_CONNECTIONS
-                # )
-
+                # draw pose landmarks (wrists)
                 lm = pose_res.pose_landmarks.landmark
                 lh = (lm[mp_pose.PoseLandmark.LEFT_WRIST].x,
                       lm[mp_pose.PoseLandmark.LEFT_WRIST].y)
@@ -70,7 +64,8 @@ def distress_worker(shared):
 
 
                 if prev_lh and prev_rh:
-                    # compute fidgeting score from wrist movements
+                    # compute fidgeting score with wrist movements
+                    # sum because one can be occluded or not moving
                     fidget_score = euclid(lh, prev_lh) + euclid(rh, prev_rh)
 
                 prev_lh, prev_rh = lh, rh
@@ -94,6 +89,7 @@ def distress_worker(shared):
                     cv2.putText(frame, name, (x + 5, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 1)
 
                 # defined landmark distances for open eye and mouth, head
+                # https://medium.com/@asadullahdal/eyes-https://medium.com/@asadullahdal/eyes-blink-detector-and-counter-mediapipe-a66254eb002cblink-detector-and-counter-mediapipe-a66254eb002c
                 eye_open = abs(lm[159].y - lm[145].y)
                 mouth_open = abs(lm[13].y - lm[14].y)
                 head = (lm[1].x, lm[1].y)
@@ -109,7 +105,7 @@ def distress_worker(shared):
                 # (e.g. lower weight for head_jitter because it's normal to move the head)
                 # stress score increases with: a lot of blinking, head and mouth movements
                 stress_score = (
-                    2.0 * eye_open +
+                    2.5 * eye_open +
                     1.5 * mouth_open +
                     1.0 * head_jitter
                 )
@@ -133,12 +129,11 @@ def distress_worker(shared):
                 stress_avg = 0
 
             # ---------------- Final computation ----------------
-            # compute fainting risk combining fidgeting and stress scores. Here using a
-            # NOTE: this is a DEMO. In the complete system, in the class FaintingRisk(), there would be a more complex, ML
-            # driven computation combining also weather data, donor's profile and data from the medical assessment
+            # Check FaintingRisk class for the actual computation
+            # Risk is set in the interval [0,1] so here pass 1.0 if the value is higher
             shared.update(
-                    fidget=min(fidget_avg * 2, 1.0),
-                    stress=min(stress_avg * 3, 1.0))
+                    fidget=min(fidget_avg * 4, 1.0),
+                    stress=min(stress_avg * 4, 1.0))
             risk = shared.risk_computation()
 
             #continuously check the thresholds

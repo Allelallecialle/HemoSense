@@ -7,7 +7,7 @@ HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
 HandLandmarkerResult = mp.tasks.vision.HandLandmarkerResult
 VisionRunningMode = mp.tasks.vision.RunningMode
 
-# initialize the global var to make it importable to main
+# initialize the global var to make it importable to main. Needed for python golbal vars
 CURRENT_HAND_STATE = "release"
 LAST_HAND_RESULT = None
 
@@ -19,7 +19,7 @@ def capture_from_camera():
         result_callback=set_hand_state)
 
     cam = cv2.VideoCapture(2)  # to capture from external camera
-    # Use OpenCV’s VideoCapture to start capturing from the webcam.
+    # Use OpenCV’s VideoCapture to start capturing from the webcam
     #cam = cv2.VideoCapture(0)
     frame_number = 0
 
@@ -59,14 +59,10 @@ def capture_from_camera():
         cv2.destroyAllWindows()
         landmarker.close()
 
+# mediapipe detection of the hand state: return squeeze or release
+# analyzing the distance of fingertips from the palm
 def mediapipe_get_hand_state(landmarks):
-    """
-    MediaPipe detection of the hand state.
-    Returns "squeeze" or "release"
-    If the fingertips are close to the palm -> 'squeeze'
-    else -> 'release'
-    """
-    # landmarks numbers we need
+    # landmarks numbers needed
     TIP_IDS = [4, 8, 12, 16, 20]  # tips of fingers
     WRIST_ID = 0  # to compute distance from the fingers
 
@@ -75,14 +71,16 @@ def mediapipe_get_hand_state(landmarks):
     wrist = landmarks[WRIST_ID]
     for tip_id in TIP_IDS:
         tip = landmarks[tip_id]
+        # compute the norm = the magnitude of distance vector
         dist = np.linalg.norm(
             np.array([tip.x - wrist.x, tip.y - wrist.y])
-        )   #compute the norm = the magnitude of distance vector
+        )
         distances.append(dist)
 
     avg_dist = np.mean(distances)   # some fingers may close earlier/later so average the distances
 
-    # threshold chosen empirically
+    # threshold chosen empirically.
+    # Can be fine-tuned based on the rubber ball dimension for AMT
     if avg_dist < 0.2:
         return "squeeze"
     else:
@@ -94,7 +92,7 @@ def set_hand_state(landmarks, output_image, timestamp):
 
     LAST_HAND_RESULT = landmarks  #store landmarks for visualization
 
-    # Safety check: no hands detected
+    # Default state if no hands detected
     if not landmarks.hand_landmarks:
         CURRENT_HAND_STATE = "release"
         return
