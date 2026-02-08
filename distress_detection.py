@@ -1,8 +1,8 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import time
 import math
+import system_threading_handler as sth
 
 mp_face = mp.solutions.face_mesh
 mp_pose = mp.solutions.pose
@@ -14,6 +14,9 @@ def euclid(p1, p2):
 
 
 def distress_worker(shared):
+    global system_state  # global var to better handle the threading
+    global state_lock
+
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FPS, 30)
 
@@ -34,6 +37,10 @@ def distress_worker(shared):
         fidget_hist, stress_hist = [], []
 
         while cap.isOpened():
+            with sth.state_lock:
+                if sth.system_state != sth.SystemState.MONITORING:
+                    break
+
             ret, frame = cap.read()
             if not ret:
                 break
@@ -152,14 +159,20 @@ def distress_worker(shared):
             cv2.imshow("Fainting Risk Monitoring", frame)
 
             # F to trigger low risk fainting and start the AMT videogame; q to quit
-            if cv2.waitKey(1) & 0xFF == ord('f'):
-                shared.start_game = True
-                shared.game_running = True
-            elif cv2.waitKey(1) & 0xFF == ord('q'):
-                shared.quit = True
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('f'):
+                # shared.start_game = True
+                # shared.game_running = True
+                with sth.state_lock:
+                    sth.system_state = sth.SystemState.GAME
+                    print(sth.system_state)
                 break
-
-            time.sleep(0.04)
+            elif key == ord('q'):
+                #shared.quit = True
+                with sth.state_lock:
+                    sth.system_state = sth.SystemState.EXIT
+                    print(sth.system_state)
+                break
 
     cap.release()
     cv2.destroyAllWindows()

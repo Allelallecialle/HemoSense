@@ -1,3 +1,4 @@
+import cv2
 import pygame
 import sys
 import math
@@ -5,6 +6,7 @@ from game_config import *
 import Balloon, TargetBand, hand_input, introduction_screen, fainting_simulation
 import threading
 from arduino_sketch.serial_port_setup import arduino_disconnect, arduino_connection
+from hand_input import DEBUG_FRAME, FRAME_LOCK, STOP_HAND_THREAD
 
 #Credits for sliding to russ123's github repo: https://github.com/russs123/pygame_tutorials/blob/main/Infinite_Background/scroll_tut.py
 
@@ -16,10 +18,7 @@ def run_videogame():
 
 
     # --- START HAND TRACKING THREAD ---
-    hand_thread = threading.Thread(
-        target=hand_input.capture_from_camera,
-        daemon=True
-    )
+    hand_thread = threading.Thread(target=hand_input.capture_from_camera)
     hand_thread.start()
     #--------- CALL ARDUINO SETUP -------------
     arduino = arduino_connection()
@@ -54,8 +53,14 @@ def run_videogame():
 
     running = True
     while running:
-        clock.tick(FPS)
+        #clock.tick(FPS)
         dt = clock.tick(FPS) / 1000.0
+
+        #to show camera hand detection
+        with FRAME_LOCK:
+            if DEBUG_FRAME is not None:
+                cv2.imshow("Hand Detection", DEBUG_FRAME)
+        cv2.waitKey(1)
 
         # draw scrolling background
         for i in range(0, tiles):
@@ -121,5 +126,9 @@ def run_videogame():
         if pygame.time.get_ticks() - game_start_time > GAME_DURATION:
             running = False
 
+    STOP_HAND_THREAD.set()
+    #kill thread
+    hand_thread.join(timeout=2)
+    cv2.destroyAllWindows()
     pygame.quit()
     sys.exit()
