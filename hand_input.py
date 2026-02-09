@@ -29,6 +29,8 @@ def capture_from_camera():
     #cam = cv2.VideoCapture(0)
     frame_number = 0
     global DEBUG_FRAME
+    global FRAME_LOCK
+    global STOP_HAND_THREAD
 
     with HandLandmarker.create_from_options(options) as landmarker:
         # loop to read the latest frame from the camera
@@ -58,11 +60,7 @@ def capture_from_camera():
 
             with FRAME_LOCK:
                 DEBUG_FRAME = annotated_image
-            #cv2.imshow("Hand Detection", cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB))
-
         cam.release()
-        # cv2.destroyAllWindows()
-        # landmarker.close()
 
 # mediapipe detection of the hand state: return squeeze or release
 # analyzing the distance of fingertips from the palm

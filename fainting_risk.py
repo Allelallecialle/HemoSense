@@ -9,9 +9,6 @@ class FaintingRisk:
         self.fidget = 0.0
         self.stress = 0.0
         self.risk = 0.0
-        # self.quit = False
-        # self.start_game = False  # videogame phase enabler
-        # self.game_running = False
 
     def update(self, fidget, stress):
         with self.lock:
@@ -38,8 +35,6 @@ class FaintingRisk:
         if self.risk_computation() >= 0.7:
             print("Low risk triggered!")
             sth.system_state = sth.SystemState.GAME
-            # self.start_game = True
-            # self.game_running = True
 
     def trigger_high_risk(self):
         if self.risk_computation() >= 0.9:

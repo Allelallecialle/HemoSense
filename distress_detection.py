@@ -161,14 +161,11 @@ def distress_worker(shared):
             # F to trigger low risk fainting and start the AMT videogame; q to quit
             key = cv2.waitKey(1) & 0xFF
             if key == ord('f'):
-                # shared.start_game = True
-                # shared.game_running = True
                 with sth.state_lock:
                     sth.system_state = sth.SystemState.GAME
                     print(sth.system_state)
                 break
             elif key == ord('q'):
-                #shared.quit = True
                 with sth.state_lock:
                     sth.system_state = sth.SystemState.EXIT
                     print(sth.system_state)
